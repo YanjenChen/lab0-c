@@ -46,12 +46,20 @@ void q_free(queue_t *q)
  */
 bool q_insert_head(queue_t *q, char *s)
 {
+    /* Return false when queue is NULL or could not allocate space */
     list_ele_t *newh;
-    /* TODO: What should you do if the q is NULL? */
+    char *news;
+    const int slen = strlen(s);
     newh = malloc(sizeof(list_ele_t));
-    /* Don't forget to allocate space for the string and copy it */
-    /* What if either call to malloc returns NULL? */
+    news = malloc(sizeof(char) * (slen + 1));
+    if (!q || !newh || !news) {
+        return false;
+    }
+    /* Copy string value and manuly add \0 to buffer end */
+    strncpy(news, s, slen);
+    news[slen] = '\0';
     newh->next = q->head;
+    newh->value = news;
     q->head = newh;
     return true;
 }
