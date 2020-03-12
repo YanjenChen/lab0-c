@@ -179,6 +179,68 @@ void q_reverse(queue_t *q)
 }
 
 /*
+ * Compare value of integer substring at start of string `a`, `b`
+ * Return value represent the following logical condition:
+ *  - `-1` if `a` < `b`
+ *  - `0` if `a` = `b`
+ *  - `1` if `a` > `b`
+ */
+static short compare_int(char const *a, char const *b)
+{
+    bool lead_zero = (*a == '0' || *b == '0');
+    short result = 0;
+    /* If `a` and `b` have same digit, compare significant digit. */
+    /* Check which integer substring have shortest digits */
+    for (; isdigit(*a) && isdigit(*b); a++, b++) {
+        if (!result) {
+            result = (*a <= *b) ? ((*a < *b) ? -1 : 0) : 1;
+        } else if (lead_zero) {
+            /* If one of substring has leading zeros, return the first */
+            /* difference. */
+            return result;
+        }
+    }
+    if (isdigit(*a) && !isdigit(*b)) {
+        result = 1;
+    } else if (!isdigit(*a) && isdigit(*b)) {
+        result = -1;
+    }
+    return result;
+}
+
+/*
+ * Compare string `a`, `b` base on nature order
+ * Return value represent the following logical condition:
+ *  - `-1` if `a` < `b`
+ *  - `0` if `a` = `b`
+ *  - `1` if `a` > `b`
+ */
+static short strnatcmp(char const *a, char const *b)
+{
+    /* TODO: What if string doesn't contains `\0`? */
+    /* TODO: Reduce time complextiy if possible. */
+    bool result = 0;
+    while (*a && *b) {
+        /* Skip leading spaces */
+        for (; isspace(*a); a++) {
+        };
+        for (; isspace(*b); b++) {
+        };
+        /* Compare digits */
+        if (isdigit(*a) && isdigit(*b) && ((result = compare_int(a, b)) != 0)) {
+            break;
+        }
+        /* Compare characters */
+        if (*a < *b) {
+            result = -1;
+        } else if (*a > *b) {
+            result = 1;
+        }
+    }
+    return result;
+}
+
+/*
  * Split list to half
  */
 static void split_list(list_ele_t *head, list_ele_t **front, list_ele_t **back)
@@ -220,8 +282,8 @@ static list_ele_t *merge(list_ele_t *a, list_ele_t *b)
     }
     tmp = head;
     while (a && b) {
-        /* if (strnatcmp(a->value, b->value) == -1) { */
-        if (strcmp(a->value, b->value) <= 0) {
+        if (strnatcmp(a->value, b->value) == -1) {
+            /* if (strcmp(a->value, b->value) <= 0) { */
             tmp->next = a;
             a = a->next;
         } else {
@@ -261,7 +323,6 @@ static void merge_sort(list_ele_t **head_ref)
 void q_sort(queue_t *q)
 {
     /* this will cause segementation falut */
-    /* strnatcmp("a", "b"); */
     if (!q || !(q->head))
         return;
     merge_sort(&(q->head));
