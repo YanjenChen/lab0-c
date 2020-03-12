@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -172,12 +173,98 @@ void q_reverse(queue_t *q)
 }
 
 /*
+ * Split list to half
+ */
+static void split_list(list_ele_t *head, list_ele_t **front, list_ele_t **back)
+{
+    list_ele_t *fast, *slow;
+    slow = head;
+    fast = head->next;
+    while (fast != NULL) {
+        fast = fast->next;
+        if (fast != NULL) {
+            slow = slow->next;
+            fast = fast->next;
+        }
+    }
+    *front = head;
+    *back = slow->next;
+    slow->next = NULL;
+    return;
+}
+
+/*
+ * Merge given list by nature order
+ * Recursive funciton call will trigger stackoverflow,
+ * use loop instead.
+ */
+static list_ele_t *merge(list_ele_t *a, list_ele_t *b)
+{
+    if (!a)
+        return b;
+    else if (!b)
+        return a;
+    list_ele_t *head, *tmp;
+    if (strcmp(a->value, b->value) <= 0) {
+        head = a;
+        a = a->next;
+    } else {
+        head = b;
+        b = b->next;
+    }
+    tmp = head;
+    while (a && b) {
+        /* if (strnatcmp(a->value, b->value) == -1) { */
+        if (strcmp(a->value, b->value) <= 0) {
+            tmp->next = a;
+            a = a->next;
+        } else {
+            tmp->next = b;
+            b = b->next;
+        }
+        tmp = tmp->next;
+    }
+    if (!a)
+        tmp->next = b;
+    else if (!b)
+        tmp->next = a;
+    return head;
+}
+
+/*
+ * Merge sort
+ */
+static void merge_sort(list_ele_t **head_ref)
+{
+    list_ele_t *head = *head_ref;
+    list_ele_t *a, *b;
+    if (!head || !(head->next)) {
+        return;
+    }
+    split_list(head, &a, &b);
+    merge_sort(&a);
+    merge_sort(&b);
+    *head_ref = merge(a, b);
+    return;
+}
+
+/*
  * Sort elements of queue in ascending order
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
 void q_sort(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    /* this will cause segementation falut */
+    /* strnatcmp("a", "b"); */
+    if (!q || !(q->head)) {
+        return;
+    }
+    merge_sort(&(q->head));
+    /* Update tail */
+    list_ele_t *tmp;
+    for (tmp = q->head; tmp->next != NULL; tmp = tmp->next) {
+    };
+    q->tail = tmp;
+    return;
 }
