@@ -25,9 +25,8 @@ queue_t *q_new()
 void q_free(queue_t *q)
 {
     /* Do nothing if queue is NULL */
-    if (!q) {
+    if (!q)
         return;
-    }
     /* Remove first list element until queue is empty */
     list_ele_t *tmp = q->head;
     while (tmp) {
@@ -50,21 +49,26 @@ void q_free(queue_t *q)
 bool q_insert_head(queue_t *q, char *s)
 {
     /* Return false when queue is NULL or could not allocate space */
+    if (!q)
+        return false;
     list_ele_t *newh;
     char *news;
     const int slen = strlen(s);
     newh = malloc(sizeof(list_ele_t));
     news = malloc(sizeof(char) * (slen + 1));
-    if (!q || !newh || !news) {
+    if (!newh || !news) {
+        if (newh)
+            free(newh);
+        if (news)
+            free(news);
         return false;
     }
     /* Copy string value and manuly add \0 to buffer end */
     strncpy(news, s, slen);
     news[slen] = '\0';
     /* Modify tail if insert first element to queue */
-    if (!(q->head)) {
+    if (!(q->head))
         q->tail = newh;
-    }
     newh->next = q->head;
     newh->value = news;
     q->head = newh;
@@ -82,12 +86,18 @@ bool q_insert_head(queue_t *q, char *s)
 bool q_insert_tail(queue_t *q, char *s)
 {
     /* Return false when queue is NULL or could not allocate space */
+    if (!q)
+        return false;
     list_ele_t *newh;
     char *news;
     const int slen = strlen(s);
     newh = malloc(sizeof(list_ele_t));
     news = malloc(sizeof(char) * (slen + 1));
-    if (!q || !newh || !news) {
+    if (!newh || !news) {
+        if (newh)
+            free(newh);
+        if (news)
+            free(news);
         return false;
     }
     /* Copy string value and manuly add \0 to buffer end */
@@ -95,11 +105,10 @@ bool q_insert_tail(queue_t *q, char *s)
     news[slen] = '\0';
     newh->value = news;
     /* Modify head if insert first element to queue */
-    if (!(q->head)) {
+    if (!(q->head))
         q->head = newh;
-    } else {
+    else
         q->tail->next = newh;
-    }
     newh->next = NULL;
     q->tail = newh;
     q->size++;
@@ -116,15 +125,13 @@ bool q_insert_tail(queue_t *q, char *s)
  */
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
-    if (!q || !(q->head)) {
+    if (!q || !(q->head))
         return false;
-    }
     list_ele_t *tmp = q->head;
     q->head = tmp->next;
     /* Modify tail if remove last element in queue */
-    if (!(tmp->next)) {
+    if (!(tmp->next))
         q->tail = NULL;
-    }
     /* Copy to sp if specified */
     const size_t slen = strlen(tmp->value);
     if (sp) {
@@ -156,9 +163,8 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    if (!q || !(q->head)) {
+    if (!q || !(q->head))
         return;
-    }
     list_ele_t *current, *prev, *tmp;
     current = q->head;
     prev = NULL;
@@ -238,9 +244,8 @@ static void merge_sort(list_ele_t **head_ref)
 {
     list_ele_t *head = *head_ref;
     list_ele_t *a, *b;
-    if (!head || !(head->next)) {
+    if (!head || !(head->next))
         return;
-    }
     split_list(head, &a, &b);
     merge_sort(&a);
     merge_sort(&b);
@@ -257,9 +262,8 @@ void q_sort(queue_t *q)
 {
     /* this will cause segementation falut */
     /* strnatcmp("a", "b"); */
-    if (!q || !(q->head)) {
+    if (!q || !(q->head))
         return;
-    }
     merge_sort(&(q->head));
     /* Update tail */
     list_ele_t *tmp;
