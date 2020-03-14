@@ -91,6 +91,15 @@ void q_reverse(queue_t *q);
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void q_sort(queue_t *q);
+void q_sort(queue_t *q, int use_natsort);
+
+/*
+ * Compare string `a`, `b` base on nature order
+ * Return value represent the following logical condition:
+ *  - `-1` if `a` < `b`
+ *  - `0` if `a` = `b`
+ *  - `1` if `a` > `b`
+ */
+int strnatcmp(char const *a, char const *b);
 
 #endif /* LAB0_QUEUE_H */

@@ -56,11 +56,14 @@ static size_t qcnt = 0;
 static int fail_limit = BIG_QUEUE;
 static int fail_count = 0;
 
+/* Nature sort flag of console option */
+static int use_natsort;
+
 static int string_length = MAXSTRING;
 
 #define MIN_RANDSTR_LEN 5
 #define MAX_RANDSTR_LEN 10
-static const char charset[] = "abcdefghijklmnopqrstuvwxyz";
+static const char charset[] = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 /* Forward declarations */
 static bool show_queue(int vlevel);
@@ -104,6 +107,7 @@ static void console_init()
               NULL);
     add_param("fail", &fail_limit,
               "Number of times allow queue operations to return false", NULL);
+    add_param("natsort", &use_natsort, "Enable/Disable nature sort", NULL);
 }
 
 static bool do_new(int argc, char *argv[])
@@ -549,16 +553,19 @@ bool do_sort(int argc, char *argv[])
 
     set_noallocate_mode(true);
     if (exception_setup(true))
-        q_sort(q);
+        q_sort(q, use_natsort);
     exception_cancel();
     set_noallocate_mode(false);
 
     bool ok = true;
+
+    int (*strcompare)(const char *, const char *) =
+        use_natsort ? strnatcmp : strcasecmp;
+
     if (q) {
         for (list_ele_t *e = q->head; e && --cnt; e = e->next) {
             /* Ensure each element in ascending order */
-            /* FIXME: add an option to specify sorting order */
-            if (strcasecmp(e->value, e->next->value) > 0) {
+            if (strcompare(e->value, e->next->value) > 0) {
                 report(1, "ERROR: Not sorted in ascending order");
                 ok = false;
                 break;

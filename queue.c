@@ -185,10 +185,10 @@ void q_reverse(queue_t *q)
  *  - `0` if `a` = `b`
  *  - `1` if `a` > `b`
  */
-static short compare_int(char const *a, char const *b)
+static int compare_int(char const *a, char const *b)
 {
     bool lead_zero = (*a == '0' || *b == '0');
-    short result = 0;
+    int result = 0;
     /* If `a` and `b` have same digit, compare significant digit. */
     /* Check which integer substring have shortest digits */
     for (; isdigit(*a) && isdigit(*b); a++, b++) {
@@ -215,11 +215,11 @@ static short compare_int(char const *a, char const *b)
  *  - `0` if `a` = `b`
  *  - `1` if `a` > `b`
  */
-static short strnatcmp(char const *a, char const *b)
+int strnatcmp(char const *a, char const *b)
 {
     /* TODO: What if string doesn't contains `\0`? */
     /* TODO: Reduce time complextiy if possible. */
-    short result = 0;
+    int result = 0;
     for (; *a && *b; a++, b++) {
         /* Skip leading spaces */
         for (; isspace(*a); a++)
@@ -267,15 +267,16 @@ static void split_list(list_ele_t *head, list_ele_t **front, list_ele_t **back)
  * Recursive funciton call will trigger stackoverflow,
  * use loop instead.
  */
-static list_ele_t *merge(list_ele_t *a, list_ele_t *b)
+static list_ele_t *merge(list_ele_t *a, list_ele_t *b, int use_natsort)
 {
     if (!a)
         return b;
     else if (!b)
         return a;
     list_ele_t *head, *tmp;
-    if (strnatcmp(a->value, b->value) <= 0) {
-        /* if (strcmp(a->value, b->value) <= 0) { */
+    int (*strcompare)(const char *, const char *) =
+        use_natsort ? strnatcmp : strcmp;
+    if (strcompare(a->value, b->value) <= 0) {
         head = a;
         a = a->next;
     } else {
@@ -284,8 +285,7 @@ static list_ele_t *merge(list_ele_t *a, list_ele_t *b)
     }
     tmp = head;
     while (a && b) {
-        if (strnatcmp(a->value, b->value) <= 0) {
-            /* if (strcmp(a->value, b->value) <= 0) { */
+        if (strcompare(a->value, b->value) <= 0) {
             tmp->next = a;
             a = a->next;
         } else {
@@ -304,16 +304,16 @@ static list_ele_t *merge(list_ele_t *a, list_ele_t *b)
 /*
  * Merge sort
  */
-static void merge_sort(list_ele_t **head_ref)
+static void merge_sort(list_ele_t **head_ref, int use_natsort)
 {
     list_ele_t *head = *head_ref;
     list_ele_t *a, *b;
     if (!head || !(head->next))
         return;
     split_list(head, &a, &b);
-    merge_sort(&a);
-    merge_sort(&b);
-    *head_ref = merge(a, b);
+    merge_sort(&a, use_natsort);
+    merge_sort(&b, use_natsort);
+    *head_ref = merge(a, b, use_natsort);
     return;
 }
 
@@ -322,12 +322,12 @@ static void merge_sort(list_ele_t **head_ref)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void q_sort(queue_t *q)
+void q_sort(queue_t *q, int use_natsort)
 {
     /* this will cause segementation falut */
     if (!q || !(q->head))
         return;
-    merge_sort(&(q->head));
+    merge_sort(&(q->head), use_natsort);
     /* Update tail */
     list_ele_t *tmp;
     for (tmp = q->head; tmp->next != NULL; tmp = tmp->next) {

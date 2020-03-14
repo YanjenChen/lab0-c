@@ -4,6 +4,7 @@
 # 100000: sorting algorithms with O(nlogn) time complexity are expected pass
 option fail 0
 option malloc 0
+option natsort 1
 new
 ih RAND 10000
 sort
