@@ -222,10 +222,10 @@ static short strnatcmp(char const *a, char const *b)
     bool result = 0;
     while (*a && *b) {
         /* Skip leading spaces */
-        for (; isspace(*a); a++) {
-        };
-        for (; isspace(*b); b++) {
-        };
+        for (; isspace(*a); a++)
+            ;
+        for (; isspace(*b); b++)
+            ;
         /* Compare digits */
         if (isdigit(*a) && isdigit(*b) && ((result = compare_int(a, b)) != 0)) {
             break;
