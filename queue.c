@@ -219,23 +219,24 @@ static short strnatcmp(char const *a, char const *b)
 {
     /* TODO: What if string doesn't contains `\0`? */
     /* TODO: Reduce time complextiy if possible. */
-    bool result = 0;
-    while (*a && *b) {
+    short result = 0;
+    for (; *a && *b; a++, b++) {
         /* Skip leading spaces */
         for (; isspace(*a); a++)
             ;
         for (; isspace(*b); b++)
             ;
         /* Compare digits */
-        if (isdigit(*a) && isdigit(*b) && ((result = compare_int(a, b)) != 0)) {
-            break;
-        }
+        if (isdigit(*a) && isdigit(*b))
+            result = compare_int(a, b);
         /* Compare characters */
-        if (*a < *b) {
+        else if (*a < *b)
             result = -1;
-        } else if (*a > *b) {
+        else if (*a > *b)
             result = 1;
-        }
+        /* Immediate break loop once comparison is not equal. */
+        if (result)
+            break;
     }
     return result;
 }
@@ -273,7 +274,8 @@ static list_ele_t *merge(list_ele_t *a, list_ele_t *b)
     else if (!b)
         return a;
     list_ele_t *head, *tmp;
-    if (strcmp(a->value, b->value) <= 0) {
+    if (strnatcmp(a->value, b->value) <= 0) {
+        /* if (strcmp(a->value, b->value) <= 0) { */
         head = a;
         a = a->next;
     } else {
@@ -282,7 +284,7 @@ static list_ele_t *merge(list_ele_t *a, list_ele_t *b)
     }
     tmp = head;
     while (a && b) {
-        if (strnatcmp(a->value, b->value) == -1) {
+        if (strnatcmp(a->value, b->value) <= 0) {
             /* if (strcmp(a->value, b->value) <= 0) { */
             tmp->next = a;
             a = a->next;
